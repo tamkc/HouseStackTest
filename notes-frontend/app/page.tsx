@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { getNotes, addNote, deleteNote } from '../lib/api';
 import ActionSearchBar from '@/components/action-search-bar';
+import { DataTable } from '@/components/noteTable/DataTable';
 
 interface Note {
   _id: string;
@@ -10,32 +11,21 @@ interface Note {
 }
 
 export default function Home() {
-  const [notes, setNotes] = useState<Note[]>([]);
-  const [title, setTitle] = useState<string>('');
-
-  useEffect(() => {
-    fetchNotes();
-  }, []);
-
-  const fetchNotes = async () => {
-    try {
-      const data = await getNotes();
-      setNotes(data);
-    } catch (error) {
-      console.error('Error fetching notes:', error);
-    }
-  };
 
   const handleAddNote = async () => {
-    if (!title.trim()) return;
+    if (!title.trim()) return; // Prevent adding empty notes
 
     try {
-      const response = await addNote({ title });
-      const newNote = response.data;
-      setNotes((prevNotes) => [...prevNotes, newNote]);
-      setTitle('');
+      const response = await addNote(title, "Default content"); // Ensure content is passed
+
+      if (!response) {
+        throw new Error("Invalid response format");
+      }
+
+      setNotes((prevNotes) => [...prevNotes, response]); // Add new note to the list
+      setTitle(""); // Clear input field
     } catch (error) {
-      console.error('Error adding note:', error);
+      console.error("Error adding note:", error);
     }
   };
 
@@ -52,7 +42,8 @@ export default function Home() {
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4 text-center">Notes</h1>
       <ActionSearchBar />
-      <div className="flex items-center mb-4">
+      <DataTable />
+      {/* <div className="flex items-center mb-4">
         <input
           className="border border-gray-300 rounded p-2 flex-grow mr-2"
           value={title}
@@ -81,7 +72,8 @@ export default function Home() {
             </button>
           </li>
         ))}
-      </ul>
+      </ul> */}
+
     </div>
   );
 }
