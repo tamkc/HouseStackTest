@@ -1,34 +1,30 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Note } from './schemas/note.schema';
-import { CreateNoteDto, UpdateNoteDto } from './dto/note.dto';
+import { Note, NoteDocument } from './schemas/note.schema';
+import { CreateNoteDto } from './dto/create-note.dto';
+import { UpdateNoteDto } from './dto/update-note.dto';
 
 @Injectable()
 export class NotesService {
-    constructor(@InjectModel(Note.name) private noteModel: Model<Note>) { }
+  constructor(@InjectModel(Note.name) private noteModel: Model<NoteDocument>) {}
 
-    async create(createNoteDto: CreateNoteDto): Promise<Note> {
-        const newNote = new this.noteModel(createNoteDto);
-        return newNote.save();
-    }
+  async create(createNoteDto: CreateNoteDto): Promise<Note> {
+    const createdNote = new this.noteModel(createNoteDto);
+    return createdNote.save();
+  }
 
-    async findAll(): Promise<Note[]> {
-        return this.noteModel.find().sort({ createdAt: -1 }).exec();
-    }
+  async findAll(): Promise<Note[]> {
+    return this.noteModel.find().sort({ createdAt: -1 }).exec();
+  }
 
-    async update(id: string, updateNoteDto: UpdateNoteDto): Promise<Note> {
-        const updatedNote = await this.noteModel.findByIdAndUpdate(id, updateNoteDto, { new: true });
-        if (!updatedNote) {
-            throw new NotFoundException('Note not found');
-        }
-        return updatedNote;
-    }
+  async update(id: string, updateNoteDto: UpdateNoteDto): Promise<Note | null> {
+    return this.noteModel
+      .findByIdAndUpdate(id, updateNoteDto, { new: true })
+      .exec();
+  }
 
-    async remove(id: string): Promise<void> {
-        const result = await this.noteModel.findByIdAndDelete(id);
-        if (!result) {
-            throw new NotFoundException('Note not found');
-        }
-    }
+  async remove(id: string): Promise<Note | null> {
+    return this.noteModel.findByIdAndDelete(id).exec();
+  }
 }
