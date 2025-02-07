@@ -37,6 +37,12 @@ Ensure you have the following installed:
 - **Node.js** (>=20.x)
 - **npm**
 
+### Getting Start
+
+   ```sh
+   git clone https://github.com/tamkc/HouseStackTest.git
+   ```
+
 ### Backend Setup (NestJS)
 
 1. Navigate to the backend directory:
