@@ -2,7 +2,7 @@ const API_BASE_URL = "http://3.98.94.83:3001";
 
 export const getNotes = async () => {
   try {
-    const res = await fetch(`${API_BASE_URL}/notes`);
+    const res = await fetch(`${API_BASE_URL}/notes/`);
     if (!res.ok) throw new Error(`Failed to fetch notes: ${res.statusText}`);
     const data = await res.json();
     return data as {
@@ -19,7 +19,7 @@ export const getNotes = async () => {
 
 export const addNote = async (title: string, content: string) => {
   try {
-    const res = await fetch(`${API_BASE_URL}/notes`, {
+    const res = await fetch(`${API_BASE_URL}/notes/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
