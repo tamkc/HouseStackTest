@@ -1,21 +1,18 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import * as fs from 'fs';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
-  let httpsOptions: { key: Buffer; cert: Buffer } | undefined = undefined;
+  const app = await NestFactory.create(AppModule);
 
-  if (fs.existsSync('server.key') && fs.existsSync('server.cert')) {
-    httpsOptions = {
-      key: fs.readFileSync('server.key'),
-      cert: fs.readFileSync('server.cert'),
-    };
-  }
-
-  const app = await NestFactory.create(AppModule, { httpsOptions });
-
+  // Enable CORS
   app.enableCors();
 
-  await app.listen(3001);
+  // Get the port from the .env file
+  const configService = app.get(ConfigService);
+  const port = configService.get<number>('PORT') || 3001;
+
+  await app.listen(port);
+  console.log(`Application is running on: http://localhost:${port}`);
 }
 void bootstrap();
