@@ -13,16 +13,13 @@ import {
     getSortedRowModel,
     useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, MoreHorizontal, Plus, Trash2, Pencil, Eye } from "lucide-react"
+import { ArrowUpDown, ChevronDown, Plus, Trash2, Pencil, Eye } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
@@ -360,86 +357,86 @@ export function DataTable() {
                     </DropdownMenu>
                 </div>
                 <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-                <DialogContent className="sm:max-w-[625px]">
-                    <DialogHeader>
-                        <DialogTitle>
-                            {isEditMode ? "Edit Note" : "View Note"}
-                        </DialogTitle>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="title">Title</Label>
-                            {isEditMode ? (
-                                <Input
-                                    id="title"
-                                    value={editedNote.title}
-                                    onChange={(e) =>
-                                        setEditedNote((prev) => ({
-                                            ...prev,
-                                            title: e.target.value,
-                                        }))
-                                    }
-                                />
-                            ) : (
-                                <div className="rounded-md border p-2">
-                                    {selectedNote?.title}
-                                </div>
-                            )}
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="content">Content</Label>
-                            {isEditMode ? (
-                                <Textarea
-                                    id="content"
-                                    value={editedNote.content}
-                                    onChange={(e) =>
-                                        setEditedNote((prev) => ({
-                                            ...prev,
-                                            content: e.target.value,
-                                        }))
-                                    }
-                                    className="h-32"
-                                />
-                            ) : (
-                                <div className="rounded-md border p-2 min-h-[8rem] whitespace-pre-wrap">
-                                    {selectedNote?.content}
-                                </div>
-                            )}
-                        </div>
-                        {selectedNote && (
-                            <div className="text-sm text-muted-foreground">
-                                Created: {new Date(selectedNote.createdAt).toLocaleString()}
+                    <DialogContent className="sm:max-w-[625px]">
+                        <DialogHeader>
+                            <DialogTitle>
+                                {isEditMode ? "Edit Note" : "View Note"}
+                            </DialogTitle>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="title">Title</Label>
+                                {isEditMode ? (
+                                    <Input
+                                        id="title"
+                                        value={editedNote.title}
+                                        onChange={(e) =>
+                                            setEditedNote((prev) => ({
+                                                ...prev,
+                                                title: e.target.value,
+                                            }))
+                                        }
+                                    />
+                                ) : (
+                                    <div className="rounded-md border p-2">
+                                        {selectedNote?.title}
+                                    </div>
+                                )}
                             </div>
-                        )}
-                    </div>
-                    <DialogFooter className="flex gap-2">
-                        {isEditMode ? (
-                            <>
-                                <Button
-                                    variant="outline"
-                                    onClick={() => {
-                                        setIsEditMode(false);
-                                        setEditedNote({
-                                            title: selectedNote?.title || "",
-                                            content: selectedNote?.content || "",
-                                        });
-                                    }}
-                                >
-                                    Cancel
+                            <div className="space-y-2">
+                                <Label htmlFor="content">Content</Label>
+                                {isEditMode ? (
+                                    <Textarea
+                                        id="content"
+                                        value={editedNote.content}
+                                        onChange={(e) =>
+                                            setEditedNote((prev) => ({
+                                                ...prev,
+                                                content: e.target.value,
+                                            }))
+                                        }
+                                        className="h-32"
+                                    />
+                                ) : (
+                                    <div className="rounded-md border p-2 min-h-[8rem] whitespace-pre-wrap">
+                                        {selectedNote?.content}
+                                    </div>
+                                )}
+                            </div>
+                            {selectedNote && (
+                                <div className="text-sm text-muted-foreground">
+                                    Created: {new Date(selectedNote.createdAt).toLocaleString()}
+                                </div>
+                            )}
+                        </div>
+                        <DialogFooter className="flex gap-2">
+                            {isEditMode ? (
+                                <>
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => {
+                                            setIsEditMode(false);
+                                            setEditedNote({
+                                                title: selectedNote?.title || "",
+                                                content: selectedNote?.content || "",
+                                            });
+                                        }}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button onClick={handleUpdateNote}>
+                                        Save Changes
+                                    </Button>
+                                </>
+                            ) : (
+                                <Button onClick={() => setIsEditMode(true)}>
+                                    <Pencil className="h-4 w-4 mr-2" />
+                                    Edit Note
                                 </Button>
-                                <Button onClick={handleUpdateNote}>
-                                    Save Changes
-                                </Button>
-                            </>
-                        ) : (
-                            <Button onClick={() => setIsEditMode(true)}>
-                                <Pencil className="h-4 w-4 mr-2" />
-                                Edit Note
-                            </Button>
-                        )}
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+                            )}
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div>
             <div className="rounded-md border">
                 <Table>
