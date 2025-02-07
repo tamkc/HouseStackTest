@@ -1,4 +1,4 @@
-const { API_BASE_URL } = process.env;
+const API_BASE_URL = "http://3.98.94.83:3001";
 
 export const getNotes = async () => {
   try {
