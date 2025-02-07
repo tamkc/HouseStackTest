@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://3.98.94.83:3001";
+const API_BASE_URL = "http://52.60.108.178:3001";
 
 export const getNotes = async () => {
   try {
