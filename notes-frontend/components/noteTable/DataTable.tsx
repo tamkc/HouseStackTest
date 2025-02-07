@@ -222,7 +222,7 @@ export function DataTable() {
                 </Button>
             ),
             cell: ({ row }) => {
-                const datetime = new Date(row.getValue("createdAt")).toLocaleString()
+                const datetime = new Date(row.getValue("createdAt")).toLocaleString().replace(/,/g, "")
                 return <div className="text-left font-medium">{datetime}</div>
             },
         },
