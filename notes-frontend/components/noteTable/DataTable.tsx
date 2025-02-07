@@ -13,8 +13,7 @@ import {
     getSortedRowModel,
     useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, MoreHorizontal, Plus, Trash2 } from "lucide-react"
-
+import { ArrowUpDown, ChevronDown, MoreHorizontal, Plus, Trash2, Pencil, Eye } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -35,16 +34,18 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { getNotes, addNote, deleteNote } from '@/lib/api'
+import { getNotes, addNote, deleteNote, updateNote } from '@/lib/api'
 import {
     Dialog,
     DialogContent,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
+    DialogFooter,
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { toast } from "@/hooks/use-toast"
+import { Textarea } from "@/components/ui/textarea"
 
 export type Note = {
     id: string
@@ -59,6 +60,12 @@ export function DataTable() {
     const [error, setError] = React.useState<string | null>(null);
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [newNote, setNewNote] = useState({ title: "", content: "" });
+
+    const [selectedNote, setSelectedNote] = useState<Note | null>(null);
+    const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+    const [isEditMode, setIsEditMode] = useState(false);
+    const [editedNote, setEditedNote] = useState({ title: "", content: "" });
+
 
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
@@ -108,6 +115,36 @@ export function DataTable() {
                 variant: "destructive",
                 title: "Error",
                 description: "Failed to add note",
+            });
+        }
+    };
+
+    const handleViewNote = (note: Note) => {
+        setSelectedNote(note);
+        setEditedNote({ title: note.title, content: note.content });
+        setIsEditMode(false);
+        setIsViewDialogOpen(true);
+    };
+
+    const handleUpdateNote = async () => {
+        if (!selectedNote) return;
+
+        try {
+            await updateNote(selectedNote.id, editedNote);
+            await fetchNotes();
+            setIsViewDialogOpen(false);
+            setSelectedNote(null);
+            setIsEditMode(false);
+            toast({
+                title: "Success",
+                description: "Note updated successfully",
+            });
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to fetch notes');
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Failed to update note",
             });
         }
     };
@@ -196,24 +233,13 @@ export function DataTable() {
                 const note = row.original
                 return (
                     <div className="flex items-center gap-2">
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                    <span className="sr-only">Open menu</span>
-                                    <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                <DropdownMenuItem
-                                    onClick={() => navigator.clipboard.writeText(note.id)}
-                                >
-                                    Copy Note ID
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem>View note details</DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        <Button
+                            variant="ghost"
+                            className="h-8 w-8 p-0"
+                            onClick={() => handleViewNote(note)}
+                        >
+                            <Eye className="h-4 w-4" />
+                        </Button>
                         <Button
                             variant="ghost"
                             className="h-8 w-8 p-0"
@@ -333,6 +359,87 @@ export function DataTable() {
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
+                <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+                <DialogContent className="sm:max-w-[625px]">
+                    <DialogHeader>
+                        <DialogTitle>
+                            {isEditMode ? "Edit Note" : "View Note"}
+                        </DialogTitle>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="title">Title</Label>
+                            {isEditMode ? (
+                                <Input
+                                    id="title"
+                                    value={editedNote.title}
+                                    onChange={(e) =>
+                                        setEditedNote((prev) => ({
+                                            ...prev,
+                                            title: e.target.value,
+                                        }))
+                                    }
+                                />
+                            ) : (
+                                <div className="rounded-md border p-2">
+                                    {selectedNote?.title}
+                                </div>
+                            )}
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="content">Content</Label>
+                            {isEditMode ? (
+                                <Textarea
+                                    id="content"
+                                    value={editedNote.content}
+                                    onChange={(e) =>
+                                        setEditedNote((prev) => ({
+                                            ...prev,
+                                            content: e.target.value,
+                                        }))
+                                    }
+                                    className="h-32"
+                                />
+                            ) : (
+                                <div className="rounded-md border p-2 min-h-[8rem] whitespace-pre-wrap">
+                                    {selectedNote?.content}
+                                </div>
+                            )}
+                        </div>
+                        {selectedNote && (
+                            <div className="text-sm text-muted-foreground">
+                                Created: {new Date(selectedNote.createdAt).toLocaleString()}
+                            </div>
+                        )}
+                    </div>
+                    <DialogFooter className="flex gap-2">
+                        {isEditMode ? (
+                            <>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => {
+                                        setIsEditMode(false);
+                                        setEditedNote({
+                                            title: selectedNote?.title || "",
+                                            content: selectedNote?.content || "",
+                                        });
+                                    }}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button onClick={handleUpdateNote}>
+                                    Save Changes
+                                </Button>
+                            </>
+                        ) : (
+                            <Button onClick={() => setIsEditMode(true)}>
+                                <Pencil className="h-4 w-4 mr-2" />
+                                Edit Note
+                            </Button>
+                        )}
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
             </div>
             <div className="rounded-md border">
                 <Table>
